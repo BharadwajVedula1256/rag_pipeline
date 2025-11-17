@@ -327,6 +327,73 @@ class OllamaEmbedding(EmbeddingProvider):
         return 768  # Default, varies by model
 
 
+class NebiusEmbedding(EmbeddingProvider):
+    """Nebius AI Studio embedding provider (OpenAI-compatible API)."""
+
+    def __init__(
+        self,
+        api_key: str,
+        model: str = "BAAI/bge-en-icl",
+        base_url: str = "https://api.studio.nebius.ai/v1/",
+        batch_size: int = 100
+    ):
+        """
+        Initialize Nebius embedding provider.
+
+        Args:
+            api_key: Nebius API key
+            model: Model name (BAAI/bge-en-icl, text-embedding-ada-002, etc.)
+            base_url: Nebius API base URL
+            batch_size: Batch size for processing
+        """
+        self.api_key = api_key
+        self.model = model
+        self.base_url = base_url
+        self.batch_size = batch_size
+
+        try:
+            from openai import OpenAI
+            self.client = OpenAI(
+                api_key=api_key,
+                base_url=base_url
+            )
+        except ImportError:
+            raise ImportError("openai package required. Install with: pip install openai")
+
+        # Common Nebius embedding dimensions
+        self.dimensions = {
+            "BAAI/bge-en-icl": 1024,
+            "text-embedding-ada-002": 1536,
+        }
+
+    def embed_text(self, text: str) -> List[float]:
+        """Generate embedding for single text."""
+        response = self.client.embeddings.create(
+            input=text,
+            model=self.model
+        )
+        return response.data[0].embedding
+
+    def embed_texts(self, texts: List[str]) -> List[List[float]]:
+        """Generate embeddings for multiple texts with batching."""
+        all_embeddings = []
+
+        for i in range(0, len(texts), self.batch_size):
+            batch = texts[i:i + self.batch_size]
+            response = self.client.embeddings.create(
+                input=batch,
+                model=self.model
+            )
+            embeddings = [item.embedding for item in response.data]
+            all_embeddings.extend(embeddings)
+
+        return all_embeddings
+
+    def get_dimension(self) -> int:
+        """Get embedding dimension."""
+        return self.dimensions.get(self.model, 1024)
+
+
 class CustomEmbedding(EmbeddingProvider):
     """Custom embedding provider using a callable function."""
 
@@ -469,6 +536,12 @@ class Embedder:
             "ollama": lambda: OllamaEmbedding(
                 model=config.model_name,
                 base_url=config.custom_endpoint or "http://localhost:11434"
+            ),
+            "nebius": lambda: NebiusEmbedding(
+                api_key=config.api_key,
+                model=config.model_name,
+                base_url=config.custom_endpoint or "https://api.studio.nebius.ai/v1/",
+                batch_size=config.batch_size
             ),
         }
 

@@ -8,6 +8,7 @@ from .generator import (
     GoogleLLM,
     CohereLLM,
     OllamaLLM,
+    NebiusLLM,
     CustomLLM
 )
 
@@ -19,5 +20,6 @@ __all__ = [
     "GoogleLLM",
     "CohereLLM",
     "OllamaLLM",
+    "NebiusLLM",
     "CustomLLM"
 ]

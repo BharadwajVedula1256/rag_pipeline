@@ -34,6 +34,8 @@ class EmbeddingConfig:
                 self.api_key = os.getenv("COHERE_API_KEY")
             elif self.provider == "huggingface":
                 self.api_key = os.getenv("HUGGINGFACE_API_KEY")
+            elif self.provider == "nebius":
+                self.api_key = os.getenv("NEBIUS_API_KEY")
 
 
 @dataclass
@@ -60,6 +62,8 @@ class LLMConfig:
                 self.api_key = os.getenv("GOOGLE_API_KEY")
             elif self.provider == "cohere":
                 self.api_key = os.getenv("COHERE_API_KEY")
+            elif self.provider == "nebius":
+                self.api_key = os.getenv("NEBIUS_API_KEY")
 
 
 @dataclass

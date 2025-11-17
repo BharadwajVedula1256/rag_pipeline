@@ -424,6 +424,93 @@ class OllamaLLM(LLMProvider):
         return self.generate(prompt, **kwargs)
 
 
+class NebiusLLM(LLMProvider):
+    """Nebius AI Studio LLM provider (OpenAI-compatible API)."""
+
+    def __init__(
+        self,
+        api_key: str,
+        model: str = "meta-llama/Meta-Llama-3.1-70B-Instruct",
+        base_url: str = "https://api.studio.nebius.ai/v1/",
+        temperature: float = 0.7,
+        max_tokens: int = 2000
+    ):
+        """
+        Initialize Nebius LLM.
+
+        Args:
+            api_key: Nebius API key
+            model: Model name (meta-llama/Meta-Llama-3.1-70B-Instruct, Qwen/Qwen2.5-72B-Instruct, etc.)
+            base_url: Nebius API base URL
+            temperature: Default temperature
+            max_tokens: Default max tokens
+        """
+        self.api_key = api_key
+        self.model = model
+        self.base_url = base_url
+        self.temperature = temperature
+        self.max_tokens = max_tokens
+
+        try:
+            from openai import OpenAI
+            self.client = OpenAI(
+                api_key=api_key,
+                base_url=base_url
+            )
+        except ImportError:
+            raise ImportError("openai package required. Install with: pip install openai")
+
+    def generate(
+        self,
+        prompt: str,
+        temperature: Optional[float] = None,
+        max_tokens: Optional[int] = None,
+        **kwargs
+    ) -> str:
+        """Generate text from prompt."""
+        response = self.client.chat.completions.create(
+            model=self.model,
+            messages=[{"role": "user", "content": prompt}],
+            temperature=temperature or self.temperature,
+            max_tokens=max_tokens or self.max_tokens,
+            **kwargs
+        )
+        return response.choices[0].message.content
+
+    def generate_with_context(
+        self,
+        query: str,
+        context: List[str],
+        system_prompt: Optional[str] = None,
+        **kwargs
+    ) -> str:
+        """Generate answer using query and context."""
+        context_str = "\n\n".join([f"[{i+1}] {ctx}" for i, ctx in enumerate(context)])
+
+        messages = []
+
+        if system_prompt:
+            messages.append({"role": "system", "content": system_prompt})
+        else:
+            default_system = (
+                "You are a helpful AI assistant. Answer the user's question based on the provided context. "
+                "If the context doesn't contain relevant information, say so clearly."
+            )
+            messages.append({"role": "system", "content": default_system})
+
+        user_message = f"Context:\n{context_str}\n\nQuestion: {query}\n\nAnswer:"
+        messages.append({"role": "user", "content": user_message})
+
+        response = self.client.chat.completions.create(
+            model=self.model,
+            messages=messages,
+            temperature=kwargs.get('temperature', self.temperature),
+            max_tokens=kwargs.get('max_tokens', self.max_tokens)
+        )
+
+        return response.choices[0].message.content
+
+
 class CustomLLM(LLMProvider):
     """Custom LLM provider using provided functions."""
 
@@ -585,6 +672,13 @@ class Generator:
                 model=config.model_name,
                 base_url=config.custom_endpoint or "http://localhost:11434",
                 temperature=config.temperature
+            ),
+            "nebius": lambda: NebiusLLM(
+                api_key=config.api_key,
+                model=config.model_name,
+                base_url=config.custom_endpoint or "https://api.studio.nebius.ai/v1/",
+                temperature=config.temperature,
+                max_tokens=config.max_tokens
             ),
         }
 

@@ -52,6 +52,7 @@ def get_api_key(provider: str) -> Optional[str]:
         "google": "GOOGLE_API_KEY",
         "cohere": "COHERE_API_KEY",
         "huggingface": "HUGGINGFACE_API_KEY",
+        "nebius": "NEBIUS_API_KEY",
         "pinecone": "PINECONE_API_KEY",
         "qdrant": "QDRANT_API_KEY",
         "weaviate": "WEAVIATE_API_KEY"
@@ -82,7 +83,7 @@ def check_required_keys(providers: list) -> dict:
 
 def print_env_status():
     """Print status of all possible API keys."""
-    providers = ["openai", "anthropic", "google", "cohere", "huggingface"]
+    providers = ["openai", "anthropic", "google", "cohere", "huggingface", "nebius"]
 
     print("=" * 60)
     print("Environment Variables Status")

@@ -8,6 +8,7 @@ from .embedder import (
     HuggingFaceEmbedding,
     CohereEmbedding,
     OllamaEmbedding,
+    NebiusEmbedding,
     CustomEmbedding
 )
 
@@ -19,5 +20,6 @@ __all__ = [
     "HuggingFaceEmbedding",
     "CohereEmbedding",
     "OllamaEmbedding",
+    "NebiusEmbedding",
     "CustomEmbedding"
 ]

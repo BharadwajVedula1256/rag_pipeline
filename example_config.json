@@ -1,0 +1,50 @@
+{
+  "embedding": {
+    "provider": "openai",
+    "model_name": "text-embedding-3-large",
+    "batch_size": 100,
+    "dimension": null,
+    "custom_endpoint": null,
+    "extra_params": {}
+  },
+  "llm": {
+    "provider": "openai",
+    "model_name": "gpt-4",
+    "temperature": 0.7,
+    "max_tokens": 2000,
+    "custom_endpoint": null,
+    "system_prompt": "You are a helpful AI assistant. Answer questions based on the provided context. If the context doesn't contain relevant information, say so clearly.",
+    "extra_params": {}
+  },
+  "chunking": {
+    "chunk_size": 800,
+    "chunk_overlap": 100,
+    "strategy": "token",
+    "respect_sentence_boundaries": true
+  },
+  "vectorstore": {
+    "provider": "chroma",
+    "collection_name": "rag_documents",
+    "persist_directory": "./vectorstore_data",
+    "distance_metric": "cosine",
+    "index_type": null
+  },
+  "retrieval": {
+    "top_k": 5,
+    "score_threshold": null,
+    "enable_reranking": false,
+    "reranker_model": null,
+    "reranker_top_k": 3,
+    "search_type": "similarity"
+  },
+  "ingestion": {
+    "supported_formats": ["pdf", "txt", "md", "html", "docx", "csv", "json"],
+    "extract_images": false,
+    "extract_tables": true,
+    "ocr_enabled": false,
+    "clean_text": true
+  },
+  "verbose": true,
+  "enable_caching": true,
+  "cache_dir": "./cache"
+}
